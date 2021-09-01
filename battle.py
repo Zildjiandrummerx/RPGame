@@ -193,14 +193,17 @@ while run:
 
     # Make sure mouse is visible
     pygame.mouse.set_visible(True)
-
     pos = pygame.mouse.get_pos()
+
     for count, bandit in enumerate(bandit_list):
         if bandit.rect.collidepoint(pos):
             # Hide Mouse
             pygame.mouse.set_visible(False)
             # Show sword in place of mouse cursor
             screen.blit(sword_img, pos)
+            if clicked == True:
+                attack = True
+                target = bandit_list[count]
 
     # Player Action
     if knight.alive == True:
@@ -209,9 +212,10 @@ while run:
             if action_cooldown >= action_wait_time:
                 #look for player action
                 #attack
-                knight.attack(bandit1)
-                current_fighter += 1
-                action_cooldown = 0
+                if attack == True and target != None:
+                    knight.attack(target)
+                    current_fighter += 1
+                    action_cooldown = 0
 
 
     # Enemy Action
@@ -234,6 +238,10 @@ while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            clicked = True
+        else:
+            clicked = False
 
     pygame.display.update()
 pygame.quit()
