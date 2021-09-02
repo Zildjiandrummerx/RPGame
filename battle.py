@@ -1,5 +1,6 @@
 import pygame
 import random
+import button
 
 pygame.init()
 
@@ -21,6 +22,7 @@ action_cooldown = 0
 action_wait_time = 90
 attack = False
 potion = False
+potion_effect = 15
 clicked = False
 
 # Define Fonts
@@ -33,6 +35,7 @@ green = (0, 255, 0)
 # Load Images
 background_img = pygame.image.load('img/Background/background.png').convert_alpha()
 panel_img = pygame.image.load('img/Icons/panel.png').convert_alpha()
+potion_img = pygame.image.load('img/Icons/potion.png').convert_alpha()
 sword_img = pygame.image.load('img/Icons/sword.png').convert_alpha()
 
 # Create function for drawing text
@@ -166,6 +169,9 @@ knight_health_bar = HealthBar(100, screen_height - bottom_panel + 40, knight.hp,
 bandit1_health_bar = HealthBar(550, screen_height - bottom_panel + 40, bandit1.hp, bandit1.max_hp)
 bandit2_health_bar = HealthBar(550, screen_height - bottom_panel + 100, bandit2.hp, bandit2.max_hp)
 
+# Create buttons
+potion_button = button.Button(screen, 100, screen_height - bottom_panel + 70, potion_img, 64, 64)
+
 run = True
 while run:
 
@@ -205,18 +211,37 @@ while run:
                 attack = True
                 target = bandit_list[count]
 
+    if potion_button.draw():
+        potion = True
+    # Show number of potions remaining
+    draw_text(str(knight.potions), font, red, 150, screen_height - bottom_panel + 70)
+
     # Player Action
     if knight.alive == True:
         if current_fighter == 1:
             action_cooldown += 1
             if action_cooldown >= action_wait_time:
-                #look for player action
-                #attack
+                # Look for player action
+
+                # Attack
                 if attack == True and target != None:
                     knight.attack(target)
                     current_fighter += 1
                     action_cooldown = 0
 
+                # Potion - Heal the player
+                if potion == True:
+                    if knight.potions > 0:
+
+                        # Check if potion would heal the player beyond max health
+                        if knight.max_hp - knight.hp > potion_effect:
+                            heal_amount = potion_effect
+                        else:
+                            heal_amount = knight.max_hp - knight.hp
+                        knight.hp += heal_amount
+                        knight.potions -= 1
+                        current_fighter += 1
+                        action_cooldown = 0
 
     # Enemy Action
     for count, bandit in enumerate(bandit_list):
@@ -224,10 +249,23 @@ while run:
             if bandit.alive == True:
                 action_cooldown += 1
                 if action_cooldown >= action_wait_time:
+                    # Check if bandint needs to heal first
+                    if (bandit.hp / bandit.max_hp) < 0.5 and bandit.potions > 0:
+                        # Check if potion would heal the bandit beyond max health
+                        if bandit.max_hp - bandit.hp > potion_effect:
+                            heal_amount = potion_effect
+                        else:
+                            heal_amount = bandit.max_hp - bandit.hp
+                        bandit.hp += heal_amount
+                        bandit.potions -= 1
+                        current_fighter += 1
+                        action_cooldown = 0
+
                     # Attack
-                    bandit.attack(knight)
-                    current_fighter += 1
-                    action_cooldown = 0
+                    else:
+                        bandit.attack(knight)
+                        current_fighter += 1
+                        action_cooldown = 0
             else:
                 current_fighter += 1
 
