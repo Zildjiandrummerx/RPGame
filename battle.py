@@ -37,6 +37,7 @@ green = (0, 255, 0)
 background_img = pygame.image.load('img/Background/background.png').convert_alpha()
 panel_img = pygame.image.load('img/Icons/panel.png').convert_alpha()
 potion_img = pygame.image.load('img/Icons/potion.png').convert_alpha()
+restart_img = pygame.image.load('img/Icons/restart.png').convert_alpha()
 victory_img = pygame.image.load('img/Icons/victory.png').convert_alpha()
 defeat_img = pygame.image.load('img/Icons/defeat.png').convert_alpha()
 sword_img = pygame.image.load('img/Icons/sword.png').convert_alpha()
@@ -176,6 +177,14 @@ class Fighter():
         self.frame_index = 0
         self.update_time = pygame.time.get_ticks()
 
+    def reset(self):
+        self.alive = True
+        self.potions = self.start_potions
+        self.hp = self.max_hp
+        self.frame_index = 0
+        self.action = 0
+        self.update_time = pygame.time.get_ticks()
+
     def draw(self):
         screen.blit(self.image, self.rect)
 
@@ -229,6 +238,7 @@ bandit2_health_bar = HealthBar(550, screen_height - bottom_panel + 100, bandit2.
 
 # Create buttons
 potion_button = button.Button(screen, 100, screen_height - bottom_panel + 70, potion_img, 64, 64)
+restart_button = button.Button(screen, 330, 120, restart_img, 120, 30)
 
 run = True
 while run:
@@ -356,6 +366,13 @@ while run:
             screen.blit(victory_img, (250, 50))
         if game_over == -1:
             screen.blit(defeat_img, (290, 50))
+        if restart_button.draw():
+            knight.reset()
+            for bandit in bandit_list:
+                bandit.reset()
+            current_fighter = 1
+            action_cooldown
+            game_over = 0
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
